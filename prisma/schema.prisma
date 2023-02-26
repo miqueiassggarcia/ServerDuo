@@ -1,0 +1,57 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  idUser       String         @id @default(uuid())
+  name         String
+  photoLink    String
+  email        String         @unique
+  hash         String
+  // Post         Post[]  
+  // Notification Notification[]
+}
+
+// model Game {
+//   idGame    String @id @default(uuid())
+//   photoLink String
+//   name      String
+//   Post      Post[]
+// }
+
+// model Post {
+//   idPost          String   @id @default(uuid())
+//   userIdUser      String
+//   gameIdGame      String
+//   title           String
+//   description     String
+//   discord         String
+//   yearPlaying     Int
+//   weekDays        String
+//   hourStart       Int
+//   hourEnd         Int
+//   useVoiceChannel Boolean
+//   createAt        DateTime @default(now())
+
+//   user User @relation(fields: [userIdUser], references: [idUser])
+//   game Game @relation(fields: [gameIdGame], references: [idGame])
+// }
+
+// model Notification {
+//   idNotification String   @id @default(uuid())
+//   userIdUser     String
+//   nameUser       String
+//   description    String
+//   createAt       DateTime @default(now())
+//   visualized     Boolean
+
+//   user User @relation(fields: [userIdUser], references: [idUser])
+// }
