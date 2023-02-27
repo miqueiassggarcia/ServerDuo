@@ -74,6 +74,25 @@ app.post("/login", async (request, response) => {
   }
 });
 
+app.post("/game", async (request, response) => {
+  const { name, photoLink } = gameSchema.parse(request.body);
+
+  const game = await prisma.game.create({
+    data: {
+      name: name,
+      photoLink: photoLink
+    }
+  });
+
+  return response.status(201).json(game)
+});
+
+app.get("/games", async (request, response) => {
+  const games = await prisma.game.findMany();
+
+  response.json(games);
+});
+
 // app.post("/mail", (request, response) => {
 //     return response.json({});
 // });

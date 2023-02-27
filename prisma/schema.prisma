@@ -20,12 +20,12 @@ model User {
   // Notification Notification[]
 }
 
-// model Game {
-//   idGame    String @id @default(uuid())
-//   photoLink String
-//   name      String
-//   Post      Post[]
-// }
+model Game {
+  idGame    String @id @default(uuid())
+  photoLink String
+  name      String
+  // Post      Post[]
+}
 
 // model Post {
 //   idPost          String   @id @default(uuid())
