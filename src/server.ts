@@ -3,6 +3,8 @@ import CryptoJS from "crypto-js";
 
 import { PrismaClient } from "@prisma/client";
 
+import { userSchema } from "./validation/User"
+
 const app = express();
 app.use(express.json());
 
@@ -11,15 +13,16 @@ const prisma = new PrismaClient({
 });
 
 app.post("/singin", async (request, response) => {
-  const body = request.body;
-  const words = CryptoJS.SHA256(body.password);
+  const {name, email, photoLink, password} = userSchema.parse(request.body);
+
+  const words = CryptoJS.SHA256(password);
   const hash = words.toString();
 
   const user = await prisma.user.create({
     data: {
-      name: body.name,
-      photoLink: body.photoLink,
-      email: body.email,
+      name: name,
+      photoLink: photoLink,
+      email: email,
       hash: hash
     }
   });
