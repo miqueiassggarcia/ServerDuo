@@ -3,7 +3,8 @@ import CryptoJS from "crypto-js";
 
 import { PrismaClient } from "@prisma/client";
 
-import { userSchema } from "./validation/User"
+import { userSchema, userLoginSchema } from "./validation/User"
+import { gameSchema } from "./validation/Game"
 
 const app = express();
 app.use(express.json());
@@ -46,12 +47,32 @@ app.get("/user/:id", async (request, response) => {
   });
 
   return response.json(user);
-})
+});
 
-// app.post("/login", (request, response) => {
-//     return response.json({});
-// });
+app.post("/login", async (request, response) => {
+  const { email, password } = userLoginSchema.parse(request.body);
 
+  const user = await prisma.user.findUniqueOrThrow({
+    select: {
+      idUser: true,
+      hash: true,
+    },
+    where: {
+      email: email
+    }
+  });
+
+  if(user.hash === CryptoJS.SHA256(password).toString()) {
+    return response.json({
+      "validate": true,
+      "idUser": user.idUser
+    })
+  } else {
+    return response.json({
+      "validate": false 
+    })
+  }
+});
 
 // app.post("/mail", (request, response) => {
 //     return response.json({});
