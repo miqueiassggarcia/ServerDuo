@@ -1,0 +1,19 @@
+import { z } from "zod";
+
+export const postSchema = z.object({
+  title: z.string()
+    .min(1, { message: "Seu titulo pracisa conter ao menos 1 caractere" })
+    .max(50, { message: "Seu titulo tem que ter menos de 50 caracteres" }),
+  description: z.string()
+    .min(1, { message: "Sua descricao pracisa conter ao menos 1 caractere" })
+    .max(300, { message: "Sua descricao tem que ter menos de 300 caracteres" }),
+  discord: z.string()
+    .min(6, { message: "Seu discord pracisa conter ao menos 6 caractere" })
+    .max(30, { message: "Seu discord tem que ter menos de 30 caracteres" }),
+  yearPlaying: z.number(),
+  weekDays: z.string()
+    .min()
+  hourStart       Int
+  hourEnd         Int
+  useVoiceChannel Boolean
+})
