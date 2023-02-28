@@ -49,7 +49,7 @@ app.get("/user/:id", async (request, response) => {
   return response.json(user);
 });
 
-app.post("/login", async (request, response) => {
+app.post("/singup", async (request, response) => {
   const { email, password } = userLoginSchema.parse(request.body);
 
   const user = await prisma.user.findUniqueOrThrow({

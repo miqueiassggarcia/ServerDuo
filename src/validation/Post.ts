@@ -11,9 +11,24 @@ export const postSchema = z.object({
     .min(6, { message: "Seu discord pracisa conter ao menos 6 caractere" })
     .max(30, { message: "Seu discord tem que ter menos de 30 caracteres" }),
   yearPlaying: z.number(),
-  weekDays: z.string()
-    .min()
-  hourStart       Int
-  hourEnd         Int
-  useVoiceChannel Boolean
+  weekDays: z.string().array(),
+  hourStart: z.number()
+    .min(1, { message: "Valor menor que 1 é inválido" })
+    .max(1439, { message: "Valor maior que 1439 é inválido" }),
+  hourEnd: z.number()
+    .min(1, { message: "Valor menor que 1 é inválido" })
+    .max(1439, { message: "Valor maior que 1439 é inválido" }),
+  useVoiceChannel: z.boolean()
 })
+
+// professions: z
+//     .object({
+//       name: z
+//         .string()
+//         .refine((name) =>
+//           fieldsOfEng.map((field) => field.name).includes(name)
+//         ),
+//       experience: z.number().refine((experience) => experience > 1),
+//     })
+//     .array(),
+// });
