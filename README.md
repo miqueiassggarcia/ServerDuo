@@ -1,4 +1,4 @@
-# eSports
+# Server duo
 
 ## ⚡ Tecnologias utilizadas
 <div>
