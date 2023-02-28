@@ -3,8 +3,9 @@ import CryptoJS from "crypto-js";
 
 import { PrismaClient } from "@prisma/client";
 
-import { userSchema, userLoginSchema } from "./validation/User"
-import { gameSchema } from "./validation/Game"
+import { userSchema, userLoginSchema } from "./validation/User";
+import { gameSchema } from "./validation/Game";
+import { postSchema } from "./validation/Post";
 
 const app = express();
 app.use(express.json());
@@ -92,6 +93,44 @@ app.get("/games", async (request, response) => {
 
   response.json(games);
 });
+
+app.post("/post", async (request, response) => {
+  const {
+    gameIdGame,
+    userIdUser,
+    title,
+    description,
+    discord,
+    yearPlaying,
+    weekDays,
+    hourStart,
+    hourEnd,
+    useVoiceChannel
+  } = postSchema.parse(request.body);
+
+  const post = await prisma.post.create({
+    data: {
+      userIdUser: userIdUser,
+      gameIdGame: gameIdGame,
+      title: title,
+      description: description,
+      discord: discord,
+      yearPlaying: yearPlaying,
+      weekDays: weekDays,
+      hourStart: hourStart,
+      hourEnd: hourEnd,
+      useVoiceChannel: useVoiceChannel
+    }
+  });
+
+  return response.status(201).json(post);
+});
+
+app.get("/posts", async (request, response) => {
+  const posts = await prisma.post.findMany();
+
+  response.json(posts);
+})
 
 // app.post("/mail", (request, response) => {
 //     return response.json({});
