@@ -130,7 +130,31 @@ app.get("/posts", async (request, response) => {
   const posts = await prisma.post.findMany();
 
   response.json(posts);
-})
+});
+
+app.get("/posts/user/:id", async (request, response) => {
+  const idUser = request.params.id;
+
+  const posts = await prisma.post.findMany({
+    where: {
+      userIdUser: idUser
+    }
+  });
+
+  response.json(posts);
+});
+
+app.get("/posts/game/:id", async (request, response) => {
+  const idGame = request.params.id;
+
+  const posts = await prisma.post.findMany({
+    where: {
+      gameIdGame: idGame
+    }
+  });
+
+  response.json(posts);
+});
 
 // app.post("/mail", (request, response) => {
 //     return response.json({});
