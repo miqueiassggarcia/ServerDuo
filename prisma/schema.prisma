@@ -16,8 +16,8 @@ model User {
   photoLink    String
   email        String         @unique
   hash         String
-  Post         Post[]  
-  // Notification Notification[]
+  Post         Post[]
+  Notification Notification[]
 }
 
 model Game {
@@ -45,13 +45,13 @@ model Post {
   game Game @relation(fields: [gameIdGame], references: [idGame])
 }
 
-// model Notification {
-//   idNotification String   @id @default(uuid())
-//   userIdUser     String
-//   nameUser       String
-//   description    String
-//   createAt       DateTime @default(now())
-//   visualized     Boolean
+model Notification {
+  idNotification String   @id @default(uuid())
+  userIdUser     String
+  nameUser       String
+  description    String
+  createAt       DateTime @default(now())
+  visualized     Boolean
 
-//   user User @relation(fields: [userIdUser], references: [idUser])
-// }
+  user User @relation(fields: [userIdUser], references: [idUser])
+}

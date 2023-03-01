@@ -14,6 +14,7 @@ const prisma = new PrismaClient({
   log: ["query"]
 });
 
+// Rota para cadastro de novo usuário
 app.post("/singin", async (request, response) => {
   const {name, email, photoLink, password} = userSchema.parse(request.body);
 
@@ -32,6 +33,7 @@ app.post("/singin", async (request, response) => {
   return response.status(201).json(user);
 });
 
+// Rota para pegar usuário por id
 app.get("/user/:id", async (request, response) => {
   const userId = request.params.id;
 
@@ -50,6 +52,7 @@ app.get("/user/:id", async (request, response) => {
   return response.json(user);
 });
 
+// Rota para validar usuário
 app.post("/singup", async (request, response) => {
   const { email, password } = userLoginSchema.parse(request.body);
 
@@ -75,6 +78,7 @@ app.post("/singup", async (request, response) => {
   }
 });
 
+// Rota para cadastrar novo jogo
 app.post("/game", async (request, response) => {
   const { name, photoLink } = gameSchema.parse(request.body);
 
@@ -88,12 +92,14 @@ app.post("/game", async (request, response) => {
   return response.status(201).json(game)
 });
 
-app.get("/games", async (request, response) => {
+// Rota para listar todos os jogos disponíveis
+app.get("/games", async (request, response) =>   {
   const games = await prisma.game.findMany();
 
   response.json(games);
 });
 
+// Rota para criar um novo post
 app.post("/post", async (request, response) => {
   const {
     gameIdGame,
@@ -126,12 +132,14 @@ app.post("/post", async (request, response) => {
   return response.status(201).json(post);
 });
 
+// Rota para listar todos os posts
 app.get("/posts", async (request, response) => {
   const posts = await prisma.post.findMany();
 
   response.json(posts);
 });
 
+// Rota para listar todos os posts por id
 app.get("/posts/user/:id", async (request, response) => {
   const idUser = request.params.id;
 
@@ -144,6 +152,7 @@ app.get("/posts/user/:id", async (request, response) => {
   response.json(posts);
 });
 
+// Rota para listar todos os jogo
 app.get("/posts/game/:id", async (request, response) => {
   const idGame = request.params.id;
 
@@ -155,21 +164,5 @@ app.get("/posts/game/:id", async (request, response) => {
 
   response.json(posts);
 });
-
-// app.post("/mail", (request, response) => {
-//     return response.json({});
-// });
-
-// app.post("/code", (request, response) => {
-//     return response.json({});
-// });
-
-// app.get("/home", (request, response) => {
-//     return response.status(201).json({teste: "teste"})
-// })
-
-// app.put("/user/id:", (request, response) => {
-//     return response.json({});
-// });
 
 app.listen("3333");
