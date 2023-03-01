@@ -19,3 +19,16 @@ saveUserToDatabase({
     name: "Diego",
     age: 18,
 });
+
+
+// professions: z
+//     .object({
+//       name: z
+//         .string()
+//         .refine((name) =>
+//           fieldsOfEng.map((field) => field.name).includes(name)
+//         ),
+//       experience: z.number().refine((experience) => experience > 1),
+//     })
+//     .array(),
+// });
