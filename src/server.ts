@@ -6,6 +6,7 @@ import { PrismaClient } from "@prisma/client";
 import { userSchema, userLoginSchema } from "./validation/User";
 import { gameSchema } from "./validation/Game";
 import { postSchema } from "./validation/Post";
+import { notificationSchema } from "./validation/Notification";
 
 const app = express();
 app.use(express.json());
@@ -164,5 +165,37 @@ app.get("/posts/game/:id", async (request, response) => {
 
   response.json(posts);
 });
+
+app.post("/notification", async (request, response) => {
+  const {
+    userIdUser,
+    nameUser,
+    description,
+    visualized
+  } = notificationSchema.parse(request.body);
+
+  const notification = await prisma.notification.create({
+    data: {
+      userIdUser: userIdUser,
+      nameUser: nameUser,
+      description: description,
+      visualized: visualized
+    }
+  });
+
+  return response.status(201).json(notification);
+});
+
+app.get("/notification/:id", async (request, response) => {
+  const userId = request.params.id;
+
+  const notifications = prisma.notification.findMany({
+    where: {
+      userIdUser: userId
+    }
+  });
+
+  return response.json(notifications);
+})
 
 app.listen("3333");
