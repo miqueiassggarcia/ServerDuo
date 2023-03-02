@@ -125,14 +125,34 @@ app.post("/singin", async (request, response) => {
 app.post("/game", async (request, response) => {
   const { name, photoLink } = gameSchema.parse(request.body);
 
-  const game = await prisma.game.create({
-    data: {
-      name: name,
-      photoLink: photoLink
-    }
-  });
+  let exists = false;
+  try {
+    const gameExists = await prisma.game.findFirst({
+      where: {
+        name: name,
+        photoLink: photoLink
+      }
+    });
 
-  return response.status(201).json(game)
+    if (gameExists) {
+      exists = true;
+    }
+  } catch (err) {
+    console.log(err);
+  }
+
+  if(!exists) {
+    const game = await prisma.game.create({
+      data: {
+        name: name,
+        photoLink: photoLink
+      }
+    });
+
+    return response.status(201).json(game);
+  } else {
+    return response.json({"message": "O jogo já existe"})
+  }
 });
 
 // Rota para listar todos os jogos disponíveis
@@ -173,13 +193,6 @@ app.post("/post", async (request, response) => {
   });
 
   return response.status(201).json(post);
-});
-
-// Rota para listar todos os posts
-app.get("/posts", async (request, response) => {
-  const posts = await prisma.post.findMany();
-
-  response.json(posts);
 });
 
 // Rota para listar todos os posts por id
@@ -231,7 +244,7 @@ app.post("/notification", async (request, response) => {
 app.get("/notification/:id", async (request, response) => {
   const userId = request.params.id;
 
-  const notifications = prisma.notification.findMany({
+  const notifications = await prisma.notification.findMany({
     where: {
       userIdUser: userId
     }
