@@ -16,66 +16,108 @@ const prisma = new PrismaClient({
 });
 
 // Rota para cadastro de novo usuário
-app.post("/singin", async (request, response) => {
+app.post("/singup", async (request, response) => {
   const {name, email, photoLink, password} = userSchema.parse(request.body);
 
-  const words = CryptoJS.SHA256(password);
-  const hash = words.toString();
+  let exists = false;
+  try {
+    const userExists = await prisma.user.findUniqueOrThrow({
+      where: {
+        email: email
+      }
+    });
 
-  const user = await prisma.user.create({
-    data: {
-      name: name,
-      photoLink: photoLink,
-      email: email,
-      hash: hash
+    if (userExists) {
+      console.log(true)
+      exists = true;
     }
-  });
+  } catch(err) {
+    console.log(err);
+  }
 
-  return response.status(201).json(user);
+  if (!exists) { 
+    const words = CryptoJS.SHA256(password);
+    const hash = words.toString();
+
+    const user = await prisma.user.create({
+      data: {
+        name: name,
+        photoLink: photoLink,
+        email: email,
+        hash: hash
+      }
+    });
+
+    return response.status(201).json(user);
+  } else {
+    return response.json({"message": "usuário já existe"})
+  }
 });
 
 // Rota para pegar usuário por id
 app.get("/user/:id", async (request, response) => {
   const userId = request.params.id;
 
-  const user = await prisma.user.findUniqueOrThrow({
-    select: {
-      name: true,
-      photoLink: true,
-      email: true,
-      hash: true,
-    },
-    where: {
-      idUser: userId,
-    }
-  });
+  try {
+    const user = await prisma.user.findUniqueOrThrow({
+      select: {
+        name: true,
+        photoLink: true,
+        email: true,
+        hash: true,
+      },
+      where: {
+        idUser: userId,
+      }
+    });
 
-  return response.json(user);
+    return response.json(user);
+  } catch (err) {
+    console.log(err);
+    return response.json({"message": "usuário não existe"})
+  }
 });
 
 // Rota para validar usuário
-app.post("/singup", async (request, response) => {
+app.post("/singin", async (request, response) => {
   const { email, password } = userLoginSchema.parse(request.body);
 
-  const user = await prisma.user.findUniqueOrThrow({
-    select: {
-      idUser: true,
-      hash: true,
-    },
-    where: {
-      email: email
-    }
-  });
+  let exists: boolean;
+  let user;
+  try {
+    user = await prisma.user.findUniqueOrThrow({
+      select: {
+        idUser: true,
+        hash: true,
+      },
+      where: {
+        email: email
+      }
+    });
 
-  if(user.hash === CryptoJS.SHA256(password).toString()) {
-    return response.json({
-      "validate": true,
-      "idUser": user.idUser
-    })
+    if(user) {
+      exists = true;
+    } else {
+      exists = false;
+    }
+  } catch (err) {
+    console.log(err);
+    exists = false;
+  }
+
+  if (exists) {
+    if(user?.hash === CryptoJS.SHA256(password).toString()) {
+      return response.json({
+        "validate": true,
+        "idUser": user.idUser
+      })
+    } else {
+      return response.json({
+        "validate": false 
+      })
+    }
   } else {
-    return response.json({
-      "validate": false 
-    })
+    return response.json({"message": "usuário não existe"});
   }
 });
 
