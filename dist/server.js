@@ -62,72 +62,138 @@ var postSchema = import_zod3.z.object({
   useVoiceChannel: import_zod3.z.boolean()
 });
 
+// src/validation/Notification.ts
+var import_zod4 = __toESM(require("zod"));
+var notificationSchema = import_zod4.default.object({
+  userIdUser: import_zod4.default.string(),
+  nameUser: import_zod4.default.string().min(1, { message: "Seu titulo pracisa conter ao menos 1 caractere" }).max(50, { message: "Seu titulo tem que ter menos de 50 caracteres" }),
+  description: import_zod4.default.string().min(1, { message: "Sua descricao pracisa conter ao menos 1 caractere" }).max(300, { message: "Sua descricao tem que ter menos de 300 caracteres" }),
+  visualized: import_zod4.default.boolean()
+});
+
 // src/server.ts
 var app = (0, import_express.default)();
 app.use(import_express.default.json());
 var prisma = new import_client.PrismaClient({
   log: ["query"]
 });
-app.post("/singin", async (request, response) => {
+app.post("/singup", async (request, response) => {
   const { name, email, photoLink, password } = userSchema.parse(request.body);
-  const words = import_crypto_js.default.SHA256(password);
-  const hash = words.toString();
-  const user = await prisma.user.create({
-    data: {
-      name,
-      photoLink,
-      email,
-      hash
+  let exists = false;
+  try {
+    const userExists = await prisma.user.findUniqueOrThrow({
+      where: {
+        email
+      }
+    });
+    if (userExists) {
+      console.log(true);
+      exists = true;
     }
-  });
-  return response.status(201).json(user);
+  } catch (err) {
+    console.log(err);
+  }
+  if (!exists) {
+    const words = import_crypto_js.default.SHA256(password);
+    const hash = words.toString();
+    const user = await prisma.user.create({
+      data: {
+        name,
+        photoLink,
+        email,
+        hash
+      }
+    });
+    return response.status(201).json(user);
+  } else {
+    return response.json({ "message": "usu\xE1rio j\xE1 existe" });
+  }
 });
 app.get("/user/:id", async (request, response) => {
   const userId = request.params.id;
-  const user = await prisma.user.findUniqueOrThrow({
-    select: {
-      name: true,
-      photoLink: true,
-      email: true,
-      hash: true
-    },
-    where: {
-      idUser: userId
-    }
-  });
-  return response.json(user);
+  try {
+    const user = await prisma.user.findUniqueOrThrow({
+      select: {
+        name: true,
+        photoLink: true,
+        email: true,
+        hash: true
+      },
+      where: {
+        idUser: userId
+      }
+    });
+    return response.json(user);
+  } catch (err) {
+    console.log(err);
+    return response.json({ "message": "usu\xE1rio n\xE3o existe" });
+  }
 });
-app.post("/singup", async (request, response) => {
+app.post("/singin", async (request, response) => {
   const { email, password } = userLoginSchema.parse(request.body);
-  const user = await prisma.user.findUniqueOrThrow({
-    select: {
-      idUser: true,
-      hash: true
-    },
-    where: {
-      email
+  let exists;
+  let user;
+  try {
+    user = await prisma.user.findUniqueOrThrow({
+      select: {
+        idUser: true,
+        hash: true
+      },
+      where: {
+        email
+      }
+    });
+    if (user) {
+      exists = true;
+    } else {
+      exists = false;
     }
-  });
-  if (user.hash === import_crypto_js.default.SHA256(password).toString()) {
-    return response.json({
-      "validate": true,
-      "idUser": user.idUser
-    });
+  } catch (err) {
+    console.log(err);
+    exists = false;
+  }
+  if (exists) {
+    if (user?.hash === import_crypto_js.default.SHA256(password).toString()) {
+      return response.json({
+        "validate": true,
+        "idUser": user.idUser
+      });
+    } else {
+      return response.json({
+        "validate": false
+      });
+    }
   } else {
-    return response.json({
-      "validate": false
-    });
+    return response.json({ "message": "usu\xE1rio n\xE3o existe" });
   }
 });
 app.post("/game", async (request, response) => {
   const { name, photoLink } = gameSchema.parse(request.body);
-  const game = await prisma.game.create({
-    data: {
-      name,
-      photoLink
+  let exists = false;
+  try {
+    const gameExists = await prisma.game.findFirst({
+      where: {
+        name,
+        photoLink
+      }
+    });
+    if (gameExists) {
+      exists = true;
     }
-  });
-  return response.status(201).json(game);
+  } catch (err) {
+    console.log(err);
+  }
+  if (!exists) {
+    const game = await prisma.game.create({
+      data: {
+        name,
+        photoLink
+      }
+    });
+    return response.status(201).json(game);
+  } else {
+    return response.json({ "message": "O jogo j\xE1 existe" });
+  }
 });
 app.get("/games", async (request, response) => {
   const games = await prisma.game.findMany();
@@ -162,10 +228,6 @@ app.post("/post", async (request, response) => {
   });
   return response.status(201).json(post);
 });
-app.get("/posts", async (request, response) => {
-  const posts = await prisma.post.findMany();
-  response.json(posts);
-});
 app.get("/posts/user/:id", async (request, response) => {
   const idUser = request.params.id;
   const posts = await prisma.post.findMany({
@@ -183,5 +245,31 @@ app.get("/posts/game/:id", async (request, response) => {
     }
   });
   response.json(posts);
+});
+app.post("/notification", async (request, response) => {
+  const {
+    userIdUser,
+    nameUser,
+    description,
+    visualized
+  } = notificationSchema.parse(request.body);
+  const notification = await prisma.notification.create({
+    data: {
+      userIdUser,
+      nameUser,
+      description,
+      visualized
+    }
+  });
+  return response.status(201).json(notification);
+});
+app.get("/notification/:id", async (request, response) => {
+  const userId = request.params.id;
+  const notifications = await prisma.notification.findMany({
+    where: {
+      userIdUser: userId
+    }
+  });
+  return response.json(notifications);
 });
 app.listen("3333");
